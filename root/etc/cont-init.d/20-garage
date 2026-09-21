@@ -1,0 +1,61 @@
+#!/bin/sh
+# Initialize Garage configuration on first run
+
+mkdir -p /config /data/meta /data/data
+chown bsd:bsd /data /data/meta /data/data
+
+if [ ! -f /config/garage.toml ]; then
+    echo "[garage] Generating starter /config/garage.toml..."
+    _RPC_SECRET="${RPC_SECRET:-$(openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')}"
+    _RPC_PUBLIC="${RPC_PUBLIC_ADDR:-127.0.0.1:3901}"
+    _ADMIN_TOKEN="${ADMIN_TOKEN:-$(openssl rand -hex 32 2>/dev/null || head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')}"
+
+    ( umask 077
+    cat <<EOF > /config/garage.toml
+# Garage configuration file
+# Bind 0.0.0.0, not [::]: FreeBSD defaults net.inet6.ip6.v6only=1, so an IPv6
+# wildcard socket refuses IPv4 and the service is unreachable on 127.0.0.1
+# (healthz, s6-ready-when and CIT's port check all probe over IPv4).
+# Reference: https://garagehq.deuxfleurs.fr/documentation/reference-manual/configuration/
+
+metadata_dir = "/data/meta"
+data_dir = "/data/data"
+db_engine = "sqlite"
+
+replication_factor = 1
+
+rpc_bind_addr = "0.0.0.0:3901"
+rpc_public_addr = "${_RPC_PUBLIC}"
+rpc_secret = "${_RPC_SECRET}"
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "0.0.0.0:3900"
+root_domain = ".s3.garage"
+
+[s3_web]
+bind_addr = "0.0.0.0:3902"
+root_domain = ".web.garage"
+index = "index.html"
+
+[admin]
+api_bind_addr = "0.0.0.0:3903"
+admin_token = "${_ADMIN_TOKEN}"
+EOF
+    )
+    echo "[garage] Starter /config/garage.toml created."
+fi
+
+# Ensure /etc/garage.toml and /usr/local/etc/garage.toml point to /config/garage.toml for CLI use
+ln -sf /config/garage.toml /etc/garage.toml
+mkdir -p /usr/local/etc
+ln -sf /config/garage.toml /usr/local/etc/garage.toml
+
+# Fix permissions
+want="$(id -u bsd):$(id -g bsd)"
+chown -R bsd:bsd /config
+have_data="$(stat -f '%u:%g' /data 2>/dev/null)"
+if [ "$have_data" != "$want" ]; then
+    echo "[garage] fixing /data ownership -> ${want}"
+    chown -R bsd:bsd /data
+fi

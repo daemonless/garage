@@ -1,0 +1,10 @@
+#!/bin/sh
+# Garage s6 service
+
+exec 2>&1
+
+READY="nc -z 127.0.0.1 3900"
+s6-ready-when "${READY}"
+
+echo "[garage] Starting Garage server: /usr/local/bin/garage -c /config/garage.toml server ${GARAGE_ARGS}"
+exec s6-setuidgid bsd /usr/local/bin/garage -c /config/garage.toml server ${GARAGE_ARGS}

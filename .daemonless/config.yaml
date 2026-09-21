@@ -1,0 +1,17 @@
+icon: ':material-warehouse:'
+build:
+  architectures:
+    - amd64
+    - aarch64
+  variants:
+    - tag: pkg
+      containerfile: Containerfile.pkg
+      aliases: ["latest"]
+      default: true
+    - tag: pkg-latest
+      containerfile: Containerfile.pkg
+      args:
+        BASE_VERSION: "15.1-latest"
+cit:
+  mode: port
+  port: 3900

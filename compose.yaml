@@ -1,0 +1,171 @@
+name: garage
+
+x-daemonless:
+  title: "Garage"
+  icon: ":material-warehouse:"
+  category: "Network"
+  description: "Lightweight, geo-distributed S3-compatible object storage service designed for self-hosting on commodity hardware."
+  upstream_url: "https://git.deuxfleurs.fr/Deuxfleurs/garage"
+  web_url: "https://garagehq.deuxfleurs.fr/"
+  freshports_url: "https://www.freshports.org/www/garage/"
+  user: "bsd"
+  mlock: false
+  upstream_binary: false
+  community: "Discord:https://discord.gg/Kb9tkhecZT"
+  appjail: true
+
+  docs:
+    env:
+      PUID: "User ID for the application process"
+      PGID: "Group ID for the application process"
+      TZ: "Timezone for the container"
+      RPC_SECRET:
+        desc: "32-byte hex RPC secret for cluster authentication (auto-generated on first run if unset)"
+        optional: true
+      ADMIN_TOKEN:
+        desc: "Admin API and metrics authorization bearer token (auto-generated on first run if unset)"
+        optional: true
+      GARAGE_ARGS:
+        desc: "Additional command-line arguments passed to garage server"
+        optional: true
+      RPC_PUBLIC_ADDR:
+        desc: "Address other cluster nodes reach this one on. The default suits a single node; clustering needs a routable address."
+        optional: true
+        level: advanced
+      GARAGE_AUTO_LAYOUT:
+        desc: "Assign a single-node layout on first boot so the node stores data without manual setup. Set false when joining an existing cluster."
+        optional: true
+        level: advanced
+      GARAGE_ZONE:
+        desc: "Zone name used by the automatic single-node layout"
+        optional: true
+        level: advanced
+      GARAGE_CAPACITY:
+        desc: "Storage this node advertises to the cluster, e.g. 10G or 2T"
+        optional: true
+        level: advanced
+    volumes:
+      /config: "Configuration directory containing garage.toml"
+      /data: "Object storage: metadata in /data/meta, data blocks in /data/data"
+    ports:
+      3900: "S3 API endpoint"
+      3901: "RPC endpoint for inter-cluster node communication"
+      3902: "S3 web endpoint (static website hosting)"
+      3903: "Admin API and Prometheus metrics endpoint"
+
+  notes: |
+    ## There is no web UI
+
+    Port 3900 is the S3 API and only answers SigV4-signed requests. Opening it
+    in a browser always returns:
+
+    ```xml
+    <Error><Code>AccessDenied</Code>
+    <Message>Forbidden: Garage does not support anonymous access yet</Message></Error>
+    ```
+
+    That is Garage working, not a fault. Use an S3 client, the admin API on
+    3903, or the `garage` CLI.
+
+    ## Modern AWS clients: turn off flexible checksums
+
+    botocore >= 1.36 and aws-cli >= 2.23 send CRC32 "flexible checksums" by
+    default, and Garage's multipart checksum does not match what they compute.
+    A large download then aborts with `FlexibleChecksumError` even though the
+    object is intact (verified: md5 of a 12 MB object matches end to end).
+
+    ```bash
+    export AWS_RESPONSE_CHECKSUM_VALIDATION=when_required
+    export AWS_REQUEST_CHECKSUM_CALCULATION=when_required
+    ```
+
+    Small objects are unaffected; this only bites on multipart transfers.
+
+    ## First run: assign a layout
+
+    A fresh node starts with **NO ROLE ASSIGNED** and stores nothing until a
+    layout is applied. This container does that for you on first boot
+    (`GARAGE_AUTO_LAYOUT=true`, zone `GARAGE_ZONE`, size `GARAGE_CAPACITY`).
+
+    Set `GARAGE_AUTO_LAYOUT=false` when joining an existing cluster, and assign
+    the layout across nodes yourself:
+
+    ```bash
+    podman exec garage garage status          # note the node ID
+    podman exec garage garage layout assign -z dc1 -c 10G <node-id>
+    podman exec garage garage layout apply --version 1
+    ```
+
+    `-c` is the capacity this node advertises; `-z` its zone.
+
+    ## Create a bucket and key
+
+    ```bash
+    podman exec garage garage bucket create mybucket
+    podman exec garage garage key create mykey          # prints the Key ID + secret
+    podman exec garage garage bucket allow --read --write --owner mybucket --key mykey
+    ```
+
+    Then point any S3 client at it, with region `garage`:
+
+    ```bash
+    aws --endpoint-url http://your-host:3900 s3 ls s3://mybucket
+    ```
+
+    ## Admin API
+
+    The admin token is generated into `/config/garage.toml` on first run (or set
+    `ADMIN_TOKEN`):
+
+    ```bash
+    curl -H "Authorization: Bearer $ADMIN_TOKEN" \
+         http://your-host:3903/v2/GetClusterStatus
+    ```
+
+    ## Static website hosting
+
+    Served on **3902**, not 3900, and matched by Host header:
+
+    ```bash
+    podman exec garage garage bucket website --allow mybucket
+    curl -H "Host: mybucket.web.garage" http://your-host:3902/
+    ```
+
+    ## FreeBSD notes
+
+    The generated config binds `0.0.0.0` rather than `[::]`. FreeBSD defaults
+    `net.inet6.ip6.v6only=1`, so an IPv6 wildcard socket refuses IPv4 and the
+    service would be unreachable on `127.0.0.1` -- taking the healthcheck and
+    the s6 readiness probe down with it.
+
+    `rpc_public_addr` is pinned to `127.0.0.1:3901`, which suits a single node.
+    Clustering needs it set to an address the other nodes can reach.
+
+services:
+  garage:
+    image: ghcr.io/daemonless/garage:latest
+    container_name: garage
+    restart: unless-stopped
+
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      # Listed here, not just under docs.env: fjord derives its install-wizard
+      # fields from this block, so anything absent is never offered.
+      - RPC_SECRET=${RPC_SECRET}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - RPC_PUBLIC_ADDR=${RPC_PUBLIC_ADDR:-127.0.0.1:3901}
+      - GARAGE_AUTO_LAYOUT=${GARAGE_AUTO_LAYOUT:-true}
+      - GARAGE_ZONE=${GARAGE_ZONE:-dc1}
+      - GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G}
+
+    volumes:
+      - /path/to/containers/garage/config:/config
+      - /path/to/containers/garage/data:/data
+
+    ports:
+      - 3900:3900
+      - 3901:3901
+      - 3902:3902
+      - 3903:3903

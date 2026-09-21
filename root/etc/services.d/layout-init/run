@@ -1,0 +1,60 @@
+#!/bin/sh
+# A fresh Garage node holds NO ROLE ASSIGNED and stores nothing until a layout
+# is applied, so an untouched container answers every S3 call with an error and
+# gives no hint that a CLI step is missing. Assign a single-node layout once,
+# then idle -- s6 restarts a service that exits, and re-running this every few
+# seconds would be pointless churn.
+#
+# Set GARAGE_AUTO_LAYOUT=false when joining a real cluster: there the layout is
+# assigned deliberately across nodes, not per-container.
+exec 2>&1
+
+idle() { exec sleep infinity; }
+
+if [ "${GARAGE_AUTO_LAYOUT:-true}" != "true" ]; then
+    echo "[layout] GARAGE_AUTO_LAYOUT=false -- leaving layout to the operator"
+    idle
+fi
+
+# Bounded wait: an unbounded retry loop here would outlive a crash-looping
+# garage and pile up one immortal poller per restart.
+i=0
+while ! nc -z 127.0.0.1 3900 2>/dev/null; do
+    i=$((i + 1))
+    if [ "$i" -gt 180 ]; then
+        echo "[layout] garage did not come up within 180s; giving up"
+        idle
+    fi
+    sleep 1
+done
+
+G="garage -c /config/garage.toml"
+
+if ! $G status 2>/dev/null | grep -q "NO ROLE ASSIGNED"; then
+    echo "[layout] node already has a role; nothing to do"
+    idle
+fi
+
+node=$($G status 2>/dev/null | awk '/^[0-9a-f]{16}/ {print $1; exit}')
+if [ -z "$node" ]; then
+    echo "[layout] could not determine node id; skipping"
+    idle
+fi
+
+zone="${GARAGE_ZONE:-dc1}"
+capacity="${GARAGE_CAPACITY:-10G}"
+echo "[layout] assigning single-node layout: node=${node} zone=${zone} capacity=${capacity}"
+
+if ! $G layout assign -z "$zone" -c "$capacity" "$node"; then
+    echo "[layout] assign failed; leaving the node unconfigured"
+    idle
+fi
+
+# A fresh cluster is at layout version 0, so the staged change applies as 1.
+if $G layout apply --version 1; then
+    echo "[layout] applied -- Garage is ready to store data"
+else
+    echo "[layout] apply failed; run 'garage layout apply' manually"
+fi
+
+idle
