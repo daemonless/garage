@@ -48,8 +48,8 @@ services:
       - GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G}  # Storage this node advertises to the cluster, e.g. 10G or 2T
       - GARAGE_ARGS=  # Additional command-line arguments passed to garage server
     volumes:
-      - "/path/to/containers/garage:/config"
-      - "/path/to/containers/garage/data:/data"
+      - "/containers/garage:/config"
+      - "/containers/garage/data:/data"
     ports:
       - "3900:3900"
       - "3901:3901"
@@ -115,9 +115,9 @@ services:
       - garage_data: /data
 volumes:
   garage:
-    device: '/path/to/containers/garage'
+    device: '/containers/garage'
   garage_data:
-    device: '/path/to/containers/garage/data'
+    device: '/containers/garage/data'
 ```
 
 **Makejail**:
@@ -158,8 +158,8 @@ podman run -d --name garage \
   -e GARAGE_ZONE=${GARAGE_ZONE:-dc1} \
   -e GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G} \
   -e GARAGE_ARGS= \
-  -v /path/to/containers/garage:/config \
-  -v /path/to/containers/garage/data:/data \
+  -v /containers/garage:/config \
+  -v /containers/garage/data:/data \
   ghcr.io/daemonless/garage:latest
 ```
 
@@ -188,8 +188,8 @@ appjail oci run -Pd \
   -e GARAGE_ZONE=${GARAGE_ZONE:-dc1} \
   -e GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G} \
   -e GARAGE_ARGS= \
-  -o fstab="/path/to/containers/garage /config <pseudofs>" \
-  -o fstab="/path/to/containers/garage/data /data <pseudofs>" \
+  -o fstab="/containers/garage /config <pseudofs>" \
+  -o fstab="/containers/garage/data /data <pseudofs>" \
   ghcr.io/daemonless/garage:latest garage
 ```
 
@@ -225,8 +225,8 @@ services:
       - GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G}
       - GARAGE_ARGS=
     volumes:
-      - "/path/to/containers/garage:/config"
-      - "/path/to/containers/garage/data:/data"
+      - "/containers/garage:/config"
+      - "/containers/garage/data:/data"
 ```
 
 Save as `bastille-compose.yml`, then run `bastille up`. Or via CLI:
@@ -243,8 +243,8 @@ bastille create -O \
   --env GARAGE_ZONE=${GARAGE_ZONE:-dc1} \
   --env GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G} \
   --env GARAGE_ARGS= \
-  --volume /path/to/containers/garage /config \
-  --volume /path/to/containers/garage/data /data \
+  --volume /containers/garage /config \
+  --volume /containers/garage/data /data \
   garage ghcr.io/daemonless/garage:latest inherit
 ```
 
@@ -274,8 +274,8 @@ bastille create -O \
       - "3902:3902"
       - "3903:3903"
     volumes:
-      - "/path/to/containers/garage:/config"
-      - "/path/to/containers/garage/data:/data"
+      - "/containers/garage:/config"
+      - "/containers/garage/data:/data"
 ```
 
 Save as `garage-deploy.yaml`, then run `ansible-playbook garage-deploy.yaml`.
