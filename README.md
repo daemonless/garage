@@ -140,67 +140,6 @@ Save the files above, then run `appjail-director up`.
 >
 > To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
 
-### Podman CLI
-
-```bash
-podman run -d --name garage \
-  -p 3900:3900 \
-  -p 3901:3901 \
-  -p 3902:3902 \
-  -p 3903:3903 \
-  -e PUID=1000 \
-  -e PGID=1000 \
-  -e TZ=UTC \
-  -e RPC_SECRET=${RPC_SECRET} \
-  -e ADMIN_TOKEN=${ADMIN_TOKEN} \
-  -e RPC_PUBLIC_ADDR=${RPC_PUBLIC_ADDR:-127.0.0.1:3901} \
-  -e GARAGE_AUTO_LAYOUT=${GARAGE_AUTO_LAYOUT:-true} \
-  -e GARAGE_ZONE=${GARAGE_ZONE:-dc1} \
-  -e GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G} \
-  -e GARAGE_ARGS= \
-  -v /containers/garage:/config \
-  -v /containers/garage/data:/data \
-  ghcr.io/daemonless/garage:latest
-```
-
-Save as `run.sh`, then run `sh run.sh`.
-
-### AppJail
-
-
-```bash
-appjail oci run -Pd \
-  -o overwrite=force \
-  -o container="args:--pull" \
-  -o virtualnet=":<random> default" \
-  -o nat \
-  -o expose="3900:3900 proto:tcp" \
-  -o expose="3901:3901 proto:tcp" \
-  -o expose="3902:3902 proto:tcp" \
-  -o expose="3903:3903 proto:tcp" \
-  -e PUID=1000 \
-  -e PGID=1000 \
-  -e TZ=UTC \
-  -e RPC_SECRET=${RPC_SECRET} \
-  -e ADMIN_TOKEN=${ADMIN_TOKEN} \
-  -e RPC_PUBLIC_ADDR=${RPC_PUBLIC_ADDR:-127.0.0.1:3901} \
-  -e GARAGE_AUTO_LAYOUT=${GARAGE_AUTO_LAYOUT:-true} \
-  -e GARAGE_ZONE=${GARAGE_ZONE:-dc1} \
-  -e GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G} \
-  -e GARAGE_ARGS= \
-  -o fstab="/containers/garage /config <pseudofs>" \
-  -o fstab="/containers/garage/data /data <pseudofs>" \
-  ghcr.io/daemonless/garage:latest garage
-```
-
-Save the files above, then run `sh run.sh`.
-
-
-> [!WARNING]
-> Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the jail's IPv4 address or hostname assigned by the virtual network.
->
-> To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
-
 ### Bastille
 
 > [!WARNING]
@@ -229,56 +168,7 @@ services:
       - "/containers/garage/data:/data"
 ```
 
-Save as `bastille-compose.yml`, then run `bastille up`. Or via CLI:
-
-```bash
-bastille create -O \
-  --env PUID=1000 \
-  --env PGID=1000 \
-  --env TZ=UTC \
-  --env RPC_SECRET=${RPC_SECRET} \
-  --env ADMIN_TOKEN=${ADMIN_TOKEN} \
-  --env RPC_PUBLIC_ADDR=${RPC_PUBLIC_ADDR:-127.0.0.1:3901} \
-  --env GARAGE_AUTO_LAYOUT=${GARAGE_AUTO_LAYOUT:-true} \
-  --env GARAGE_ZONE=${GARAGE_ZONE:-dc1} \
-  --env GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G} \
-  --env GARAGE_ARGS= \
-  --volume /containers/garage /config \
-  --volume /containers/garage/data /data \
-  garage ghcr.io/daemonless/garage:latest inherit
-```
-
-### Ansible
-
-```yaml
-- name: Deploy garage
-  containers.podman.podman_container:
-    name: garage
-    image: "ghcr.io/daemonless/garage:latest"
-    state: started
-    restart_policy: always
-    env:
-      PUID: "1000"
-      PGID: "1000"
-      TZ: "UTC"
-      RPC_SECRET: "${RPC_SECRET}"
-      ADMIN_TOKEN: "${ADMIN_TOKEN}"
-      RPC_PUBLIC_ADDR: "${RPC_PUBLIC_ADDR:-127.0.0.1:3901}"
-      GARAGE_AUTO_LAYOUT: "${GARAGE_AUTO_LAYOUT:-true}"
-      GARAGE_ZONE: "${GARAGE_ZONE:-dc1}"
-      GARAGE_CAPACITY: "${GARAGE_CAPACITY:-10G}"
-      GARAGE_ARGS: ""
-    ports:
-      - "3900:3900"
-      - "3901:3901"
-      - "3902:3902"
-      - "3903:3903"
-    volumes:
-      - "/containers/garage:/config"
-      - "/containers/garage/data:/data"
-```
-
-Save as `garage-deploy.yaml`, then run `ansible-playbook garage-deploy.yaml`.
+Save as `bastille-compose.yml`, then run `bastille up`.
 
 ## Parameters
 
