@@ -9,7 +9,8 @@
 # assigned deliberately across nodes, not per-container.
 exec 2>&1
 
-idle() { exec sleep infinity; }
+# FreeBSD sleep has no "infinity": it errors, and s6 restarts it every 5s.
+idle() { exec sleep 2147483647; }
 
 if [ "${GARAGE_AUTO_LAYOUT:-true}" != "true" ]; then
     echo "[layout] GARAGE_AUTO_LAYOUT=false -- leaving layout to the operator"
