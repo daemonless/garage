@@ -46,7 +46,7 @@ services:
       - GARAGE_AUTO_LAYOUT=${GARAGE_AUTO_LAYOUT:-true}  # Assign a single-node layout on first boot so the node stores data without manual setup. Set false when joining an existing cluster.
       - GARAGE_ZONE=${GARAGE_ZONE:-dc1}  # Zone name used by the automatic single-node layout
       - GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G}  # Storage this node advertises to the cluster, e.g. 10G or 2T
-      - GARAGE_ARGS=  # Additional command-line arguments passed to garage server
+      # - GARAGE_ARGS=  # Additional command-line arguments passed to garage server
     volumes:
       - "/containers/garage:/config"
       - "/containers/garage/data:/data"
@@ -77,7 +77,6 @@ RPC_PUBLIC_ADDR=${RPC_PUBLIC_ADDR:-127.0.0.1:3901}
 GARAGE_AUTO_LAYOUT=${GARAGE_AUTO_LAYOUT:-true}
 GARAGE_ZONE=${GARAGE_ZONE:-dc1}
 GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G}
-GARAGE_ARGS=
 ```
 
 **appjail-director.yml**:
@@ -109,7 +108,6 @@ services:
         - GARAGE_AUTO_LAYOUT: !ENV '${GARAGE_AUTO_LAYOUT}'
         - GARAGE_ZONE: !ENV '${GARAGE_ZONE}'
         - GARAGE_CAPACITY: !ENV '${GARAGE_CAPACITY}'
-        - GARAGE_ARGS: !ENV '${GARAGE_ARGS}'
     volumes:
       - garage: /config
       - garage_data: /data
@@ -162,7 +160,6 @@ services:
       - GARAGE_AUTO_LAYOUT=${GARAGE_AUTO_LAYOUT:-true}
       - GARAGE_ZONE=${GARAGE_ZONE:-dc1}
       - GARAGE_CAPACITY=${GARAGE_CAPACITY:-10G}
-      - GARAGE_ARGS=
     volumes:
       - "/containers/garage:/config"
       - "/containers/garage/data:/data"
