@@ -1,11 +1,11 @@
 {
-  "generated": "2026-10-18T08:03:19Z",
+  "generated": "2026-10-20T00:59:18Z",
   "image": "garage",
   "tags": {
     "pkg-aarch64": {
       "app_version": "2.4.1",
       "arch": "aarch64",
-      "generated": "2026-10-18T08:02:29Z",
+      "generated": "2026-10-20T00:58:10Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -350,9 +350,9 @@
       }
     },
     "pkg-latest-aarch64": {
-      "app_version": "2.4.1",
+      "app_version": "2.4.1_1",
       "arch": "aarch64",
-      "generated": "2026-10-18T08:02:33Z",
+      "generated": "2026-10-20T00:58:15Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -613,7 +613,7 @@
               "AGPLv3"
             ],
             "name": "garage",
-            "version": "2.4.1"
+            "version": "2.4.1_1"
           },
           {
             "licenses": [
