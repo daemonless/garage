@@ -1,0 +1,7 @@
+name = "garage";
+provides = ["garage"];
+type = "simple";
+enable = true;
+command = "/daemonless/libexec/garage";
+process { env_file = "/run/rcd.env"; }
+restart { policy = "always"; max_retries = 0; delay = 5000; backoff = "none"; }

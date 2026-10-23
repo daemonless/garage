@@ -2,14 +2,14 @@
 # A fresh Garage node holds NO ROLE ASSIGNED and stores nothing until a layout
 # is applied, so an untouched container answers every S3 call with an error and
 # gives no hint that a CLI step is missing. Assign a single-node layout once,
-# then idle -- s6 restarts a service that exits, and re-running this every few
+# then idle -- rcd restarts a service that exits, and re-running this every few
 # seconds would be pointless churn.
 #
 # Set GARAGE_AUTO_LAYOUT=false when joining a real cluster: there the layout is
 # assigned deliberately across nodes, not per-container.
 exec 2>&1
 
-# FreeBSD sleep has no "infinity": it errors, and s6 restarts it every 5s.
+# FreeBSD sleep has no "infinity": it errors, and rcd restarts it every 5s.
 idle() { exec sleep 2147483647; }
 
 if [ "${GARAGE_AUTO_LAYOUT:-true}" != "true" ]; then
