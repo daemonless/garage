@@ -1,11 +1,11 @@
 {
-  "generated": "2026-10-20T00:59:18Z",
+  "generated": "2026-10-23T18:02:39Z",
   "image": "garage",
   "tags": {
     "pkg-aarch64": {
       "app_version": "2.4.1",
       "arch": "aarch64",
-      "generated": "2026-10-20T00:58:10Z",
+      "generated": "2026-10-23T18:01:35Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -174,13 +174,6 @@
             "licenses": [
               "BSD2CLAUSE"
             ],
-            "name": "FreeBSD-rc",
-            "version": "15.1"
-          },
-          {
-            "licenses": [
-              "BSD2CLAUSE"
-            ],
             "name": "FreeBSD-resolvconf",
             "version": "15.1"
           },
@@ -189,7 +182,7 @@
               "BSD2CLAUSE"
             ],
             "name": "FreeBSD-runtime",
-            "version": "15.1p4"
+            "version": "15.1p5"
           },
           {
             "licenses": [
@@ -238,7 +231,7 @@
               "PD"
             ],
             "name": "FreeBSD-zoneinfo",
-            "version": "15.1p4"
+            "version": "15.1p5"
           },
           {
             "licenses": [
@@ -252,14 +245,7 @@
               "MPL20"
             ],
             "name": "ca_root_nss",
-            "version": "3.130"
-          },
-          {
-            "licenses": [
-              "ISCL"
-            ],
-            "name": "execline",
-            "version": "2.9.8.1"
+            "version": "3.131"
           },
           {
             "licenses": [
@@ -306,20 +292,6 @@
           },
           {
             "licenses": [
-              "ISCL"
-            ],
-            "name": "s6",
-            "version": "2.14.0.1"
-          },
-          {
-            "licenses": [
-              "ISCL"
-            ],
-            "name": "skalibs",
-            "version": "2.14.5.1"
-          },
-          {
-            "licenses": [
               "GPLv2",
               "BSD3CLAUSE"
             ],
@@ -338,7 +310,7 @@
       "source": "pkg",
       "summary": {
         "dotnet": 0,
-        "freebsd": 45,
+        "freebsd": 41,
         "go": 0,
         "java": 0,
         "node": 0,
@@ -346,13 +318,13 @@
         "python": 0,
         "ruby": 0,
         "rust": 0,
-        "total": 45
+        "total": 41
       }
     },
     "pkg-latest-aarch64": {
       "app_version": "2.4.1_1",
       "arch": "aarch64",
-      "generated": "2026-10-20T00:58:15Z",
+      "generated": "2026-10-23T18:01:40Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -521,13 +493,6 @@
             "licenses": [
               "BSD2CLAUSE"
             ],
-            "name": "FreeBSD-rc",
-            "version": "15.1"
-          },
-          {
-            "licenses": [
-              "BSD2CLAUSE"
-            ],
             "name": "FreeBSD-resolvconf",
             "version": "15.1"
           },
@@ -536,7 +501,7 @@
               "BSD2CLAUSE"
             ],
             "name": "FreeBSD-runtime",
-            "version": "15.1p4"
+            "version": "15.1p5"
           },
           {
             "licenses": [
@@ -585,7 +550,7 @@
               "PD"
             ],
             "name": "FreeBSD-zoneinfo",
-            "version": "15.1p4"
+            "version": "15.1p5"
           },
           {
             "licenses": [
@@ -599,14 +564,7 @@
               "MPL20"
             ],
             "name": "ca_root_nss",
-            "version": "3.130"
-          },
-          {
-            "licenses": [
-              "ISCL"
-            ],
-            "name": "execline",
-            "version": "2.9.8.1"
+            "version": "3.131"
           },
           {
             "licenses": [
@@ -653,20 +611,6 @@
           },
           {
             "licenses": [
-              "ISCL"
-            ],
-            "name": "s6",
-            "version": "2.14.0.1"
-          },
-          {
-            "licenses": [
-              "ISCL"
-            ],
-            "name": "skalibs",
-            "version": "2.14.5.1"
-          },
-          {
-            "licenses": [
               "GPLv2",
               "BSD3CLAUSE"
             ],
@@ -685,7 +629,7 @@
       "source": "pkg",
       "summary": {
         "dotnet": 0,
-        "freebsd": 45,
+        "freebsd": 41,
         "go": 0,
         "java": 0,
         "node": 0,
@@ -693,7 +637,7 @@
         "python": 0,
         "ruby": 0,
         "rust": 0,
-        "total": 45
+        "total": 41
       }
     }
   }
